@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: voting-deployment
+  labels: 
+    name: voting-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: voting-app-fe  
+  template: #from metadata to end of yaml
+    metadata:
+      name: voting-app
+      labels: #label from pod def template
+        app: voting-app
+        name: voting-app-fe
+    spec:
+      containers:
+      - name: voting-app
+        image: kodekloud/examplevotingapp_vote:v1
+        ports:
+          - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: voting-service
+  labels:
+    app: voting-service
+    name: voting-service-fe
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30001
+  selector: #connects only with the pod labels. Even with one label from pod template it can connect
+    name: voting-app-fe
